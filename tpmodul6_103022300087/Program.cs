@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 class SayaTubeVideo
 {
@@ -8,8 +9,7 @@ class SayaTubeVideo
 
     public SayaTubeVideo(string title)
     {
-        if (string.IsNullOrEmpty(title))
-            throw new ArgumentException("Title cannot be null or empty");
+        Debug.Assert(!string.IsNullOrEmpty(title) && title.Length <= 100, "Title cannot be null or exceed 100 characters");
 
         Random rand = new Random();
         this.id = rand.Next(10000, 99999);
@@ -19,10 +19,19 @@ class SayaTubeVideo
 
     public void IncreasePlayCount(int count)
     {
-        if (count < 0)
-            throw new ArgumentException("Play count cannot be negative");
+        Debug.Assert(count > 0 && count <= 10000000, "Play count increment must be between 1 and 10,000,000");
 
-        playCount += count;
+        try
+        {
+            checked
+            {
+                playCount += count;
+            }
+        }
+        catch (OverflowException)
+        {
+            Console.WriteLine("Error: Play count overflow detected!");
+        }
     }
 
     public void PrintVideoDetails()
@@ -41,5 +50,17 @@ class Program
         SayaTubeVideo video = new SayaTubeVideo("Tutorial Design By Contract – AGUNG PERAMERTA");
         video.IncreasePlayCount(100);
         video.PrintVideoDetails();
+
+        try
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                video.IncreasePlayCount(1000000000);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception caught: " + ex.Message);
+        }
     }
 }
